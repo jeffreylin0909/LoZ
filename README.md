@@ -1,2 +1,2 @@
-# LoZ
-Yo my name is link!
+# The Legend of Zelda on computer
+
