@@ -1,6 +1,7 @@
 import tkinter as tk
 import threading as th
 from subprocess import call
+from random import randint, choice
 
 root=tk.Tk()
 root.title('The Legend of Zelda')
@@ -16,7 +17,11 @@ linkf=w=tk.PhotoImage(file='gameobject\\linkf.gif')
 linkb=w=tk.PhotoImage(file='gameobject\\linkb.gif')
 mon=tk.PhotoImage(file='gameobject\\monster.gif')
 mon2=tk.PhotoImage(file='gameobject\\monster2.gif')
+ganon1=tk.PhotoImage(file='gameobject\\ganon1.gif')
+ganon2=tk.PhotoImage(file='gameobject\\ganon2.gif')
+ganon=tk.PhotoImage(file='gameobject\\ganon.gif')
 hart=tk.PhotoImage(file='gameobject\\hart.gif')
+hart0=tk.PhotoImage(file='gameobject\\hart_black.gif')
 none=tk.PhotoImage(file='gameobject\\hart0.gif')
 w=tk.PhotoImage(file='gameobject\\wall.gif')
 w1=tk.PhotoImage(file='gameobject\\wall1.gif')
@@ -45,7 +50,7 @@ wall_static_list=[
 [870,630],[920,630],[970,630],[1020,630],
 [1070,630],[1120,630],[1170,630],[1220,630],[1270,630]
 ]
-hart_list=[[255,30,0],[230,30,0],[205,30,0],[180,30,0],[155,30,0],[130,30,0],[105,30,0],[80,30,1],[55,30,1],[30,30,1]]
+hart_list=[[255,30,-1],[230,30,-1],[205,30,-1],[180,30,-1],[155,30,-1],[130,30,-1],[105,30,-1],[80,30,1],[55,30,1],[30,30,1]]
 wall_move_list_LV1=[[620,350],[670,350],[570,350],[620,400],[520,350],[720,350],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20]]
 wall_move_list_LV2=[[130,350],[1140,350],[180,400],[1090,400],[180,450],[1090,450],[180,350],[1090,350],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20]]
 wall_move_list_LV3=[[620,350],[670,350],[570,350],[620,450],[520,350],[720,350],[520,450],[720,450],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20]]
@@ -58,9 +63,10 @@ wall_move_list_LV9=[[570,300],[570,350],[570,400],[570,450],[570,500],[620,500],
 wall_move_list_LV10=[[570,300],[570,350],[570,400],[570,450],[570,500],[620,500],[670,500],[620,300],[670,300],[720,350],[720,400],[720,450],[-20,-20],[-20,-20]]
 wall_move_list_LV11=[[620,250],[640,300],[600,300],[660,350],[580,350],[680,400],[560,400],[700,450],[540,450],[720,500],[520,500],[670,400],[620,400],[570,400]]
 wall_move_list_LV12=[[-50,-50],[-50,-50],[-50,-50],[-50,-50],[-50,-50],[-50,-50],[-50,-50],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20]]
+wall_move_list_LV13=[[620,350],[670,350],[570,350],[620,400],[520,350],[720,350],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20]]
 wall_move_list=[wall_move_list_LV1,wall_move_list_LV2,wall_move_list_LV3,wall_move_list_LV4,
 wall_move_list_LV5,wall_move_list_LV6,wall_move_list_LV7,wall_move_list_LV8,
-wall_move_list_LV9,wall_move_list_LV10,wall_move_list_LV11,wall_move_list_LV12]
+wall_move_list_LV9,wall_move_list_LV10,wall_move_list_LV11,wall_move_list_LV12,wall_move_list_LV13]
 monster_list_LV1=[[510,400,5,1,1],[730,400,-5,1,1]]
 monster_list_LV2=[[130,400,5,2,1],[1140,400,5,2,1]]
 monster_list_LV3=[[670,400,5,2,1],[570,400,5,2,1]]
@@ -73,9 +79,13 @@ monster_list_LV9=[[620,450,5,1,2],[620,450,-5,2,2]]
 monster_list_LV10=[[720,500,5,1,2],[720,300,5,1,2]]
 monster_list_LV11=[[670,500,-5,1,2],[570,500,5,1,2]]
 monster_list_LV12=[[-50,-50,-5,3,1],[-50,-50,5,3,1]]
+monster_list_LV13=[[-50,-50,-5,3,1],[-50,-50,5,3,1]]
 monster_move_list=[monster_list_LV1,monster_list_LV2,monster_list_LV3,monster_list_LV4,
 monster_list_LV5,monster_list_LV6,monster_list_LV7,monster_list_LV8,
-monster_list_LV9,monster_list_LV10,monster_list_LV11,monster_list_LV12]
+monster_list_LV9,monster_list_LV10,monster_list_LV11,monster_list_LV12,monster_list_LV13]
+boss_list=[[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],
+[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0]
+,[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],[620,500,3,1]]
 class main_character():
     def __init__(self,name,x,y,imag):
         self.kill=0
@@ -184,7 +194,7 @@ class monster():
             if abs(canvas.coords(link.image)[0] - canvas.coords(self.image)[0]) < 30 and abs(canvas.coords(link.image)[1] - canvas.coords(self.image)[1])<30:
                 for i in hart_container_list:
                     if i.e==1:
-                        canvas.itemconfig(i.image,image=none)
+                        canvas.itemconfig(i.image,image=hart0)
                         i.e=0
                         if link.dire=='f':
                             link.is_hurt(ord('s'),40)
@@ -197,7 +207,7 @@ class monster():
                         break
 
                     if hart_container_list[-2].e==0:
-                        canvas.itemconfig(i,image=none)
+                        canvas.itemconfig(i,image=hart0)
                         link.delete()
                         canvas.itemconfig(GG,image=gameover)
 
@@ -263,22 +273,155 @@ class hart_container():
     def __init__(self,x,y,e):
         hart_container_list.append(self)
         self.e=e
-        if e==0:
+        if e==-1:
             self.image=canvas.create_image(x,y,anchor='center',image=none)
         else:
             self.image=canvas.create_image(x,y,anchor='center',image=hart)
 
+class boss():
+    def __init__(self,x,y,lives,w):
+        self.x=x
+        self.y=y
+        self.lives=lives
+        self.w=w
+        self.dire=choice('1234')
+        self.die_count=0
+        self.image=canvas.create_image(x,y,anchor='center',image=ganon1)
+
+    def move(self):
+        if self.lives:
+            if self.lives==1:
+                canvas.itemconfig(self.image,image=ganon)
+            elif self.lives==2:
+                canvas.itemconfig(self.image,image=ganon2)
+            elif self.lives==3:
+                canvas.itemconfig(self.image,image=ganon1)        
+            if self.w==1:
+                for i in wall_list:
+                    if abs(canvas.coords(i.image)[0] - canvas.coords(self.image)[0]) < 100 and abs(canvas.coords(i.image)[1] - canvas.coords(self.image)[1])<100:
+                        if canvas.coords(i.image)[0]>canvas.coords(self.image)[0] and abs(canvas.coords(i.image)[0] - canvas.coords(self.image)[0])>abs(canvas.coords(i.image)[1] - canvas.coords(self.image)[1]):
+                            self.dire=choice('134')
+                            canvas.move(self.image,-5,0)
+                            break
+                        if canvas.coords(i.image)[0]<canvas.coords(self.image)[0] and abs(canvas.coords(i.image)[0] - canvas.coords(self.image)[0])>abs(canvas.coords(i.image)[1] - canvas.coords(self.image)[1]):
+                            self.dire=choice('123')
+                            canvas.move(self.image,5,0)
+                            break
+                        if canvas.coords(i.image)[1]<canvas.coords(self.image)[1] and abs(canvas.coords(i.image)[0] - canvas.coords(self.image)[0])<abs(canvas.coords(i.image)[1] - canvas.coords(self.image)[1]):
+                            self.dire=choice('234')
+                            canvas.move(self.image,0,5)
+                            break
+                        if canvas.coords(i.image)[1]>canvas.coords(self.image)[1] and abs(canvas.coords(i.image)[0] - canvas.coords(self.image)[0])<abs(canvas.coords(i.image)[1] - canvas.coords(self.image)[1]):
+                            self.dire=choice('124')
+                            canvas.move(self.image,0,-5)
+                            break
+                if canvas.coords(self.image)[1]<0:
+                    canvas.move(self.image,0,630)
+                    self.dire=choice('124')
+                if canvas.coords(self.image)[1]>630:
+                    canvas.move(self.image,0,-630)
+                    self.dire=choice('234')
+                if canvas.coords(self.image)[0]<20:
+                    canvas.move(self.image,1250,0)
+                    self.dire=choice('134')
+                if canvas.coords(self.image)[0]>1270:
+                    canvas.move(self.image,-1250,0)
+                    self.dire=choice('123')
+                
+                if self.dire=='1':
+                    canvas.move(self.image,0,-10)
+                if self.dire=='2':
+                    canvas.move(self.image,10,0)
+                if self.dire=='3':
+                    canvas.move(self.image,0,10)
+                if self.dire=='4':
+                    canvas.move(self.image,-10,0)
+
+    def can_attack_or_not(self):
+        if self.lives and link.is_alive==True:
+            if abs(canvas.coords(link.image)[0] - canvas.coords(self.image)[0]) < 50 and abs(canvas.coords(link.image)[1] - canvas.coords(self.image)[1])<50:
+                for i in hart_container_list:
+                    if i.e==1:
+                        canvas.itemconfig(i.image,image=hart0)
+                        i.e=0
+                        if link.dire=='f':
+                            link.is_hurt(ord('s'),40)
+                        if link.dire=='r':
+                            link.is_hurt(ord('d'),40)
+                        if link.dire=='l':
+                            link.is_hurt(ord('a'),40)
+                        if link.dire=='b':
+                            link.is_hurt(ord('w'),40)
+                        break
+
+                    if hart_container_list[-2].e==0:
+                        canvas.itemconfig(i,image=hart0)
+                        link.delete()
+                        canvas.itemconfig(GG,image=gameover)
+
+    def is_dead_or_not(self,code):
+        if self.lives and link.is_alive==True:
+            if abs(canvas.coords(link.image)[0] - canvas.coords(self.image)[0]) < 70 and abs(canvas.coords(link.image)[1] - canvas.coords(self.image)[1])<70:
+                if code==32:
+                    if abs(canvas.coords(self.image)[0]-canvas.coords(link.image)[0])>abs(canvas.coords(self.image)[1]-canvas.coords(link.image)[1]):
+                        if canvas.coords(self.image)[0]>canvas.coords(link.image)[0]:
+                            canvas.itemconfig(link.image, image = linkr)
+                            link.attack='r'
+                            th.Timer(0.3,back_to_stand).start()
+                        else:
+                            canvas.itemconfig(link.image, image = linkl)
+                            link.attack='l'
+                            th.Timer(0.3,back_to_stand).start()
+                    else:
+                        if canvas.coords(self.image)[1]>canvas.coords(link.image)[1]:
+                            canvas.itemconfig(link.image, image = linkf)
+                            link.attack='f'
+                            th.Timer(0.3,back_to_stand).start()
+                        else:
+                            canvas.itemconfig(link.image, image = linkb)
+                            link.attack='b'
+                            th.Timer(0.3,back_to_stand).start()
+                    self.lives-=1
+                    if self.lives==0:
+                        self.delete()
+                        rubby.set(rubby.get() + 1)
+                        link.kill+=1
+    def delete(self):
+        th.Timer(0.03,self.die_config).start()
+        self.die_count=0
+
+    def die_config(self):
+        if self.die_count%2==1:
+            canvas.itemconfig(self.image,image=none)
+        if self.die_count%2==0:
+            canvas.itemconfig(self.image,image=ganon)
+        if self.die_count<=10:
+            self.die_count+=1
+            th.Timer(0.03,self.die_config).start()
+
+    def move_to(self,x,y,lives,w):
+        self.x=x
+        self.y=y
+        self.lives=lives
+        self.w=w
+        canvas.move(self.image,x-canvas.coords(self.image)[0],y-canvas.coords(self.image)[1])
+                
 def callback(event):
     link.walk(event.keycode)
     for i in monster_list:
         i.is_dead_or_not(event.keycode)
+    ganon_dorf.is_dead_or_not(event.keycode)
     if abs(canvas.coords(link.image)[0] - canvas.coords(sign)[0]) < 50 and abs(canvas.coords(link.image)[1] - canvas.coords(sign)[1])<50:
         if event.keycode==32:
             if link.kill>=5:
                 for i in hart_container_list:
-                    if i.e==1:
+                    if i.e==1 or i.e==0:
                         hart_container_list[hart_container_list.index(i)-1].e=1
                         canvas.itemconfig(hart_container_list[hart_container_list.index(i)-1].image,image=hart)
+                        for i in hart_container_list:
+                            if i.e==0:
+                                i.e=1
+                                canvas.itemconfig(i.image,image=hart)
                         break
                 link.kill-=5
                 rubby.set(rubby.get() -5)
@@ -303,6 +446,8 @@ def timer_callback():
         elif canvas.coords(link.image)[1]<-20:
             link.move_to(620,670,'b')
             th.Thread(target=next_level).start()
+    ganon_dorf.move()
+    ganon_dorf.can_attack_or_not()
 
     th.Timer(0.05, timer_callback).start()
 
@@ -354,6 +499,7 @@ def next_level():
         i.move_to(wall_move_list[link.level-1][wall_list.index(i)][0],wall_move_list[link.level-1][wall_list.index(i)][1])
         if wall_list.index(i)==len(wall_move_list_LV1)-1:
             break
+    ganon_dorf.move_to(boss_list[link.level-1][0],boss_list[link.level-1][1],boss_list[link.level-1][2],boss_list[link.level-1][3])
 
 link=main_character('link',620,-20,linkwf)
 for i in monster_list_LV1:
@@ -362,6 +508,7 @@ for i in wall_move_list_LV1:
     wall(i[0],i[1],w1)
 for i in wall_static_list:
     wall(i[0], i[1], w)
+ganon_dorf=boss(boss_list[0][0],boss_list[0][1],boss_list[0][2],boss_list[0][3])
 rubby=tk.IntVar()
 rubby.set(link.kill)
 for i in hart_list:
