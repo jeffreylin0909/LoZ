@@ -1,12 +1,18 @@
+#import 所需模組
 import tkinter as tk
 import threading as th
 from subprocess import call
 from random import randint, choice
-
+###
+#創建基本GUI
 root=tk.Tk()
 root.title('The Legend of Zelda')
 root.geometry('1280x650')
+###
+#創建canvas
 canvas=tk.Canvas(root,width=1280,height=660,bg='green')
+###
+#引進遊戲所需圖像
 linkwf = tk.PhotoImage(file = "gameobject\\link.gif")
 linkr=w=tk.PhotoImage(file='gameobject\\linkr.gif')
 linkl=w=tk.PhotoImage(file='gameobject\\linkl.gif')
@@ -28,11 +34,16 @@ w1=tk.PhotoImage(file='gameobject\\wall1.gif')
 gameover=tk.PhotoImage(file='gameobject\\gameover.gif')
 Sign=tk.PhotoImage(file='gameobject\\sign.gif')
 logo=tk.PhotoImage(file='gameobject\\logo.gif')
+###
+#改變GUI logo
 root.tk.call('wm', 'iconphoto', root._w, logo)
-
+###
+#宣告list
 wall_list=[]
 monster_list=[]
 hart_container_list=[]
+###
+#各物件,各關卡座標資料
 wall_static_list=[
 [20,30],[20,80],[20,130],[20,180],[20,230],
 [20,430],[20,480],[20,530],[20,580],[20,630],
@@ -86,6 +97,8 @@ monster_list_LV9,monster_list_LV10,monster_list_LV11,monster_list_LV12,monster_l
 boss_list=[[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],
 [-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0]
 ,[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],[-50,-50,1,0],[620,500,3,1]]
+###
+#class主角
 class main_character():
     def __init__(self,name,x,y,imag):
         self.kill=0
@@ -156,7 +169,8 @@ class main_character():
     def move_to(self,x,y,dire):
         self.dire=dire
         canvas.move(self.image,x-canvas.coords(self.image)[0],y-canvas.coords(self.image)[1])
-
+###
+#class小怪
 class monster():
     def __init__(self,x,y,step,dire,lives):
         self.image=canvas.create_image(x,y,anchor='center',image=mon)
@@ -256,7 +270,8 @@ class monster():
         self.step=step
         self.lives=lives
         canvas.move(self.image,x-canvas.coords(self.image)[0],y-canvas.coords(self.image)[1])
-
+###
+#class牆
 class wall():
     def __init__(self,x,y,img):
         self.image=canvas.create_image(x,y,anchor='center',image=img)
@@ -268,7 +283,8 @@ class wall():
                 link.is_hurt(code,5)
     def move_to(self,x,y):
         canvas.move(self.image,x-canvas.coords(self.image)[0],y-canvas.coords(self.image)[1])
-
+###
+#class血量
 class hart_container():
     def __init__(self,x,y,e):
         hart_container_list.append(self)
@@ -277,7 +293,8 @@ class hart_container():
             self.image=canvas.create_image(x,y,anchor='center',image=none)
         else:
             self.image=canvas.create_image(x,y,anchor='center',image=hart)
-
+###
+#class boss
 class boss():
     def __init__(self,x,y,lives,w):
         self.x=x
@@ -405,7 +422,8 @@ class boss():
         self.lives=lives
         self.w=w
         canvas.move(self.image,x-canvas.coords(self.image)[0],y-canvas.coords(self.image)[1])
-                
+###
+#定義鍵盤callback程序       
 def callback(event):
     link.walk(event.keycode)
     for i in monster_list:
@@ -425,7 +443,8 @@ def callback(event):
                         break
                 link.kill-=5
                 rubby.set(rubby.get() -5)
-
+###
+#定義計時器callback程序
 def timer_callback():
     for i in monster_list:
         i.move()
@@ -450,7 +469,8 @@ def timer_callback():
     ganon_dorf.can_attack_or_not()
 
     th.Timer(0.05, timer_callback).start()
-
+###
+#定義讓主角在攻擊後回到站立姿勢的程序
 def back_to_stand():
     if link.is_alive==True:
         if link.attack=='l':
@@ -465,8 +485,8 @@ def back_to_stand():
         if link.attack=='b':
             canvas.itemconfig(link.image, image = linkwb)
             link.attack='c'
-
-
+###
+#定義主角出場的程序
 def showup():
     if link.is_alive:
         if link.dire=='f':
@@ -482,7 +502,8 @@ def showup():
             if canvas.coords(link.image)[0]>=1235:
                 canvas.move(link.image,-5,0)
         th.Timer(0.05,showup).start()
-
+###
+#定義讓主角前往下一關的程序
 def next_level():
     if link.level==len(monster_move_list):
         link.level=1
@@ -500,7 +521,8 @@ def next_level():
         if wall_list.index(i)==len(wall_move_list_LV1)-1:
             break
     ganon_dorf.move_to(boss_list[link.level-1][0],boss_list[link.level-1][1],boss_list[link.level-1][2],boss_list[link.level-1][3])
-
+###
+#套用class
 link=main_character('link',620,-20,linkwf)
 for i in monster_list_LV1:
     monster(i[0],i[1],i[2],i[3],i[4])
@@ -508,20 +530,31 @@ for i in wall_move_list_LV1:
     wall(i[0],i[1],w1)
 for i in wall_static_list:
     wall(i[0], i[1], w)
-ganon_dorf=boss(boss_list[0][0],boss_list[0][1],boss_list[0][2],boss_list[0][3])
-rubby=tk.IntVar()
-rubby.set(link.kill)
 for i in hart_list:
     hart_container(i[0],i[1],i[2])
+ganon_dorf=boss(boss_list[0][0],boss_list[0][1],boss_list[0][2],boss_list[0][3])
+###
+#新增女神像
 sign=canvas.create_image(-500,-500,anchor='center',image=Sign)
+###
+#新增顯示在螢幕上的變數(主角擊殺數)
+rubby=tk.IntVar()
+rubby.set(link.kill)
 tk.Label(root,text='Kill :', bg='green', width=5, height=2 ).place(x=1110,y=10)
 tk.Label(root,textvariable=rubby, bg='green', width=3, height=2 ).place(x=1150,y=10)
+###
+#新增死亡時會出現的[GAMEOVER]字樣
 GG=canvas.create_image(620,300,anchor='center',image=none,tag='GG')
+###
+#套用函數
 t=th.Timer(0.05,timer_callback)
 t.start()
 sh=th.Timer(0.5,showup)
 sh.start()
+#GUI綁定鍵盤
 canvas.focus_set()
 canvas.bind('<Key>',callback)
+###
+#打包開始遊戲!
 canvas.pack()
 root.mainloop()
