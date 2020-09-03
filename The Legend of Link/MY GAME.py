@@ -103,7 +103,6 @@ level=1
 #class主角
 class main_character():
     def __init__(self,x,y,imag):
-        self.kill=0
         self.is_alive=True#是否活著
         self.image= canvas.create_image(x,y,anchor='center',image=imag)
         self.dire='f'#目前方向
@@ -222,6 +221,10 @@ class monster():
                     if hart_container_list[-2].e==0:
                         link.delete()
                         canvas.itemconfig(GG,image=gameover)
+                        th.Timer(3,end).start()
+                        hart_container_list[-1].e=0
+                        canvas.itemconfig(hart_container_list[-1].image,image=hart0)
+                        break
 
                     
     def is_dead_or_not(self,code):
@@ -250,7 +253,6 @@ class monster():
                     if self.lives==0:
                         self.delete()
                         kills.set(kills.get() + 1)
-                        link.kill+=1
 
     def die_config(self):
         for i in range(10):
@@ -301,7 +303,7 @@ def callback(event):
                 i.is_dead_or_not(event.keycode)
             if abs(canvas.coords(link.image)[0] - canvas.coords(sign)[0]) < 50 and abs(canvas.coords(link.image)[1] - canvas.coords(sign)[1])<50:
                 if event.keycode==32:
-                    if link.kill>=5:
+                    if kills.get()>=5:
                         for i in hart_container_list:
                             if i.e==1 or i.e==0:
                                 hart_container_list[hart_container_list.index(i)-1].e=1
@@ -311,7 +313,6 @@ def callback(event):
                                         i.e=1
                                         canvas.itemconfig(i.image,image=hart)
                                 break
-                        link.kill-=5
                         kills.set(kills.get() -5)
             if abs(canvas.coords(link.image)[0] - canvas.coords(endgame)[0]) < 100 and abs(canvas.coords(link.image)[1] - canvas.coords(endgame)[1])<100:
                 if event.keycode==32:
@@ -425,6 +426,15 @@ def next_level():
                 break
         th.Thread(target=showup).start()
 def start():
+    canvas.itemconfig(GG,image=none)
+    kills.set(0)
+    for i in range(10):
+        hart_container_list[i].e=hart_list[i][2]
+        if hart_container_list[i].e==-1:
+            canvas.itemconfig(hart_container_list[i].image,image=none)
+        else:
+            canvas.itemconfig(hart_container_list[i].image,image=hart)
+    canvas.itemconfig(link.image,image=linkwf)
     link.is_alive=1
     canvas.pack()
     #各種會和主角同步的動畫開始!
@@ -456,10 +466,9 @@ def end():
     canvas.itemconfig(endgame,image=endgame_image)
     pts.pack()
     canvas.pack_forget()
-    next_level()
     link.move_to(620,30,'f')
-    link.attack='f'
-    back_to_stand()
+    level=len(monster_move_list)
+    next_level()
     started=0
     notpaused=1
 ###
@@ -482,7 +491,7 @@ endgame=canvas.create_image(-500,-500,anchor='center',image=endgame_image)
 ###
 #新增顯示在螢幕上的變數(主角擊殺數)
 kills=tk.IntVar()
-kills.set(link.kill)
+kills.set(0)
 bord1=tk.Label(root,text='Kill :', bg='green', width=5, height=2 )
 bord2=tk.Label(root,textvariable=kills, bg='green', width=3, height=2 )
 #起始標籤
