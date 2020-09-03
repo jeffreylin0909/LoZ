@@ -19,9 +19,6 @@ linkf=w=tk.PhotoImage(file='gameobject\\linkf.gif')
 linkb=w=tk.PhotoImage(file='gameobject\\linkb.gif')
 mon=tk.PhotoImage(file='gameobject\\monster.gif')
 mon2=tk.PhotoImage(file='gameobject\\monster2.gif')
-ganon1=tk.PhotoImage(file='gameobject\\ganon1.gif')
-ganon2=tk.PhotoImage(file='gameobject\\ganon2.gif')
-ganon=tk.PhotoImage(file='gameobject\\ganon.gif')
 hart=tk.PhotoImage(file='gameobject\\hart.gif')
 hart0=tk.PhotoImage(file='gameobject\\hart_black.gif')
 none=tk.PhotoImage(file='gameobject\\hart0.gif')
@@ -32,6 +29,8 @@ Sign=tk.PhotoImage(file='gameobject\\sign.gif')
 logo=tk.PhotoImage(file='gameobject\\logo.gif')
 PST_image=tk.PhotoImage(file='gameobject\\press to start.gif')
 Paused_image=tk.PhotoImage(file='gameobject\\paused.gif')
+endgame_image=tk.PhotoImage(file='gameobject\\sword.gif')
+get_sword_image=tk.PhotoImage(file='gameobject\\get_sword.gif')
 ###
 #宣告list
 wall_list=[]
@@ -69,7 +68,7 @@ wall_move_list_LV9=[[570,300],[570,350],[570,400],[570,450],[570,500],[620,500],
 wall_move_list_LV10=[[570,300],[570,350],[570,400],[570,450],[570,500],[620,500],[670,500],[620,300],[670,300],[720,350],[720,400],[720,450],[-20,-20],[-20,-20]]
 wall_move_list_LV11=[[620,250],[640,300],[600,300],[660,350],[580,350],[680,400],[560,400],[700,450],[540,450],[720,500],[520,500],[670,400],[620,400],[570,400]]
 wall_move_list_LV12=[[-50,-50],[-50,-50],[-50,-50],[-50,-50],[-50,-50],[-50,-50],[-50,-50],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20]]
-wall_move_list_LV13=[[620,350],[670,350],[570,350],[620,400],[520,350],[720,350],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20]]
+wall_move_list_LV13=[[130,350],[1140,350],[180,400],[1090,400],[180,450],[1090,450],[180,350],[1090,350],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20],[-20,-20]]
 wall_move_list=[wall_move_list_LV1,wall_move_list_LV2,wall_move_list_LV3,wall_move_list_LV4,
 wall_move_list_LV5,wall_move_list_LV6,wall_move_list_LV7,wall_move_list_LV8,
 wall_move_list_LV9,wall_move_list_LV10,wall_move_list_LV11,wall_move_list_LV12,wall_move_list_LV13]
@@ -314,6 +313,9 @@ def callback(event):
                                 break
                         link.kill-=5
                         kills.set(kills.get() -5)
+            if abs(canvas.coords(link.image)[0] - canvas.coords(endgame)[0]) < 100 and abs(canvas.coords(link.image)[1] - canvas.coords(endgame)[1])<100:
+                if event.keycode==32:
+                    gets()
     elif started==0 and event.keycode==32:
         started=1
         start()
@@ -323,7 +325,9 @@ def callback(event):
 def timer_callback():
     global started
     global notpaused
-    if started and notpaused:
+    if not started:
+        return
+    if notpaused:
         for i in monster_list:
             i.move()
             i.can_attack_or_not()
@@ -350,7 +354,9 @@ def timer_callback():
 def back_to_stand():
     global started
     global notpaused
-    if started and notpaused:
+    if not started:
+        return
+    if notpaused:
         if link.is_alive==True:
             if link.attack=='l':
                 canvas.itemconfig(link.image, image = linkwl)
@@ -369,7 +375,9 @@ def back_to_stand():
 def showup():
     global started
     global notpaused
-    if started and notpaused:
+    if not started:
+        return
+    if notpaused:
         if link.is_alive:
             if link.dire=='f':
                 while canvas.coords(link.image)[1]<=30:
@@ -393,7 +401,9 @@ def next_level():
     global level
     global started
     global notpaused
-    if started and notpaused:
+    if not started:
+        return
+    if notpaused:
         if level==len(monster_move_list):
             level=1
         else:
@@ -402,6 +412,10 @@ def next_level():
             canvas.move(sign,620-canvas.coords(sign)[0],400-canvas.coords(sign)[1])
         else:
             canvas.move(sign,-500-canvas.coords(sign)[0],-500-canvas.coords(sign)[1])
+        if level==len(monster_move_list):
+            canvas.move(endgame,620-canvas.coords(endgame)[0],400-canvas.coords(endgame)[1])
+        else:
+            canvas.move(endgame,-500-canvas.coords(endgame)[0],-500-canvas.coords(endgame)[1])
         link.show=0
         for i in monster_list:
             i.move_to(monster_move_list[level-1][monster_list.index(i)][0],monster_move_list[level-1][monster_list.index(i)][1],monster_move_list[level-1][monster_list.index(i)][2],monster_move_list[level-1][monster_list.index(i)][3],monster_move_list[level-1][monster_list.index(i)][4])
@@ -411,6 +425,7 @@ def next_level():
                 break
         th.Thread(target=showup).start()
 def start():
+    link.is_alive=1
     canvas.pack()
     #各種會和主角同步的動畫開始!
     th.Thread(target=timer_callback).start()
@@ -425,11 +440,28 @@ def pause(event):
     if started:
         if notpaused==1:
             notpaused=0
-            paused_.place(x=440,y=275)
+            canvas.itemconfig(paused_,image=Paused_image)
         else:
             notpaused=1
-            paused_.place_forget()
-    
+            canvas.itemconfig(paused_,image=none)
+def gets():
+    link.is_alive=0
+    canvas.itemconfig(endgame,image=get_sword_image)
+    canvas.itemconfig(link.image,image=none)
+    th.Timer(3,end).start()
+def end():
+    global level
+    global notpaused
+    global started
+    canvas.itemconfig(endgame,image=endgame_image)
+    pts.pack()
+    canvas.pack_forget()
+    next_level()
+    link.move_to(620,30,'f')
+    link.attack='f'
+    back_to_stand()
+    started=0
+    notpaused=1
 ###
 #創建canvas
 canvas=tk.Canvas(root,width=1280,height=660,bg='green')
@@ -446,6 +478,7 @@ for i in hart_list:
 ###
 #新增女神像
 sign=canvas.create_image(-500,-500,anchor='center',image=Sign)
+endgame=canvas.create_image(-500,-500,anchor='center',image=endgame_image)
 ###
 #新增顯示在螢幕上的變數(主角擊殺數)
 kills=tk.IntVar()
@@ -456,9 +489,9 @@ bord2=tk.Label(root,textvariable=kills, bg='green', width=3, height=2 )
 pts=tk.Label(root,width=1280,height=650,image=PST_image)
 pts.pack()
 #暫停標籤
-paused_=tk.Label(root,width=400,height=100,image=Paused_image)
+paused_=canvas.create_image(620,300,anchor='center',image=none)
 #新增死亡時會出現的[GAMEOVER]字樣
-GG=canvas.create_image(620,300,anchor='center',image=none,tag='GG')
+GG=canvas.create_image(620,300,anchor='center',image=none)
 ###
 #GUI綁定鍵盤
 root.focus_set()
