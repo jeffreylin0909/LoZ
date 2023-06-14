@@ -4,7 +4,7 @@ import tkinter as tk
 import threading as th
 import os
 from random import randint, choice
-###
+###123
 #創建基本GUI
 root=tk.Tk()
 ###
